@@ -114,7 +114,7 @@ class ConstellixAPI(object):
             self.log.debug('Waiting for Constellix Rate Limit Delay')
         time.sleep(self.ratelimit_delay)
 
-        return resp, self._get_json(resp), headers, from_cache
+        return self._get_json(resp), headers, from_cache
 
 
 class ConstellixClient(ConstellixAPI):
@@ -132,9 +132,7 @@ class ConstellixClient(ConstellixAPI):
         self._geofilters = None
 
     def _request(self, method, path, params=None, data=None):
-        response, data, headers, cached = super()._request(
-            method, path, params, data
-        )
+        data, headers, cached = super()._request(method, path, params, data)
         return data
 
     @property
@@ -345,18 +343,16 @@ class SonarClient(ConstellixAPI):
         self._checks = {'tcp': None, 'http': None}
 
     def _request(self, method, path, params=None, data=None):
-        resp, data, headers, cached = super()._request(
-            method, path, params, data
-        )
+        data, headers, cached = super()._request(method, path, params, data)
 
-        return resp
+        return data, headers
 
     @property
     def agents(self):
         if self._agents is None:
             agents = []
 
-            data = self._request('GET', '/system/sites').json()
+            data, headers = self._request('GET', '/system/sites')
             agents += data
 
             self._agents = {f'{a["name"]}.': a for a in agents}
@@ -385,7 +381,7 @@ class SonarClient(ConstellixAPI):
         if self._checks[check_type] is None:
             self._checks[check_type] = {}
             path = f'/{check_type}'
-            data = self._request('GET', path).json()
+            data, headers = self._request('GET', path)
             for check in data:
                 self._checks[check_type][check['id']] = check
         return self._checks[check_type].values()
@@ -399,23 +395,19 @@ class SonarClient(ConstellixAPI):
 
     def check_create(self, check_type, data):
         path = f'/{check_type}'
-        response = self._request('POST', path, data=data)
+        data, headers = self._request('POST', path, data=data)
+
         # Parse check ID from Location response header
-        id = self.parse_uri_id(response.headers["Location"])
+        id = self.parse_uri_id(headers["Location"])
         # Get check details
         path = f'/{check_type}/{id}'
-        data = self._request('GET', path, data=data).json()
+        data, headers = self._request('GET', path)
 
         # Update our cache
         self._checks[check_type]['id'] = data
         return data
 
-    def check_delete(self, check_id):
-        # first get check type
-        path = f'/check/type/{check_id}'
-        data = self._request('GET', path).json()
-        check_type = data['type'].lower()
-
+    def check_delete(self, check_type, check_id):
         path = f'/{check_type}/{check_id}'
         self._request('DELETE', path)
 
@@ -957,7 +949,7 @@ class ConstellixProvider(BaseProvider):
 
         existing_check = self._sonar.check(check_type, check_name)
         if existing_check:
-            self._sonar.check_delete(existing_check['id'])
+            self._sonar.check_delete(check_type, existing_check['id'])
 
         return self._sonar.check_create(check_type, check)
 

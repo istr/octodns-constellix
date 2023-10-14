@@ -791,57 +791,65 @@ class TestConstellixProvider(TestCase):
         ]
         provider._client._request.side_effect = resp_side_effect
 
-        sonar_resp = Mock()
-        sonar_resp.json = Mock()
-        type(sonar_resp).headers = PropertyMock(
-            return_value={
-                'Location': 'http://api.sonar.constellix.com/rest/api/tcp/52906'
-            }
-        )
-        sonar_resp.headers = Mock()
-        provider._sonar._request = Mock(return_value=sonar_resp)
+        provider._sonar._request = Mock()
 
         sonar_resp_side_effect = [
-            [
+            (
+                [
+                    {
+                        'id': 1,
+                        'name': 'USWAS01',
+                        'label': 'Site 1',
+                        'location': 'Washington, DC, U.S.A',
+                        'country': 'U.S.A',
+                        'region': 'ASIAPAC',
+                    },
+                    {
+                        'id': 23,
+                        'name': 'CATOR01',
+                        'label': 'Site 1',
+                        'location': 'Toronto,Canada',
+                        'country': 'Canada',
+                        'region': 'EUROPE',
+                    },
+                    {
+                        'id': 25,
+                        'name': 'CATOR01',
+                        'label': 'Site 1',
+                        'location': 'Toronto,Canada',
+                        'country': 'Canada',
+                        'region': 'OCEANIA',
+                    },
+                ],
+                {},
+            ),  # available agents
+            (
+                [{'id': 52, 'name': 'unit.tests.:www.dynamic:A:two-1.2.3.4'}],
+                {},
+            ),  # initial checks
+            ({}, {}),  # call('DELETE', '/tcp/52'),  # recreate, same name
+            (
+                {},
                 {
-                    'id': 1,
-                    'name': 'USWAS01',
-                    'label': 'Site 1',
-                    'location': 'Washington, DC, U.S.A',
-                    'country': 'U.S.A',
-                    'region': 'ASIAPAC',
+                    'Location': 'http://api.sonar.constellix.com/rest/api/tcp/52906'
                 },
+            ),  # call('POST', '/tcp', ...
+            (
+                {'id': 52906, 'name': 'unit.tests.:www.dynamic:A:two-1.2.3.4'},
+                {},
+            ),  # check_create GET data
+            (
+                {},
                 {
-                    'id': 23,
-                    'name': 'CATOR01',
-                    'label': 'Site 1',
-                    'location': 'Toronto,Canada',
-                    'country': 'Canada',
-                    'region': 'EUROPE',
+                    'Location': 'http://api.sonar.constellix.com/rest/api/tcp/52907'
                 },
-                {
-                    'id': 25,
-                    'name': 'CATOR01',
-                    'label': 'Site 1',
-                    'location': 'Toronto,Canada',
-                    'country': 'Canada',
-                    'region': 'OCEANIA',
-                },
-            ],  # available agents
-            [
-                {'id': 52, 'name': 'unit.tests.:www.dynamic:A:two-1.2.3.4'}
-            ],  # initial checks
-            {'type': 'TCP'},
-            {
-                'id': 52906,
-                'name': 'unit.tests.:www.dynamic:A:two-1.2.3.4',
-            },  # check_create GET data
-            {
-                'id': 52907,
-                'name': 'unit.tests.:www.dynamic:A:two-1.2.3.5',
-            },  # check_create GET data
+            ),  # call('POST', '/tcp', ...
+            (
+                {'id': 52907, 'name': 'unit.tests.:www.dynamic:A:two-1.2.3.5'},
+                {},
+            ),  # check_create GET data
         ]
-        sonar_resp.json.side_effect = sonar_resp_side_effect
+        provider._sonar._request.side_effect = sonar_resp_side_effect
 
         plan = provider.plan(expected)
 
@@ -929,10 +937,8 @@ class TestConstellixProvider(TestCase):
         )
 
         # Check nothing else happened in sonar:
-        # +2 for two check_create calls, +1 for one check_delete call
-        # these methods have two API calls but only one .json() call
         self.assertEqual(
-            len(sonar_resp_side_effect) + 3, provider._sonar._request.call_count
+            len(sonar_resp_side_effect), provider._sonar._request.call_count
         )
 
         # Check what happened in sonar
@@ -940,7 +946,6 @@ class TestConstellixProvider(TestCase):
             [
                 call('GET', '/system/sites'),
                 call('GET', '/tcp'),
-                call('GET', '/check/type/52'),
                 call('DELETE', '/tcp/52'),  # recreate, same name
                 call(
                     'POST',
@@ -954,18 +959,7 @@ class TestConstellixProvider(TestCase):
                         'ipVersion': 'IPV4',
                     },
                 ),  # only returns 201 / created with new ID in header
-                call(
-                    'GET',
-                    '/tcp/52906',
-                    data={
-                        'name': 'unit.tests.:www.dynamic:A:two-1.2.3.4',
-                        'host': '1.2.3.4',
-                        'port': 80,
-                        'checkSites': [1],
-                        'interval': 'ONEMINUTE',
-                        'ipVersion': 'IPV4',
-                    },
-                ),
+                call('GET', '/tcp/52906'),
                 call(
                     'POST',
                     '/tcp',
@@ -978,18 +972,7 @@ class TestConstellixProvider(TestCase):
                         'ipVersion': 'IPV4',
                     },
                 ),  # only returns 201 / created with new ID in header
-                call(
-                    'GET',
-                    '/tcp/52906',
-                    data={
-                        'name': 'unit.tests.:www.dynamic:A:two-1.2.3.5',
-                        'host': '1.2.3.5',
-                        'port': 80,
-                        'checkSites': [1],
-                        'interval': 'ONEMINUTE',
-                        'ipVersion': 'IPV4',
-                    },
-                ),
+                call('GET', '/tcp/52907'),
             ]
         )
 
@@ -1081,31 +1064,44 @@ class TestConstellixProvider(TestCase):
                 'Location': 'http://api.sonar.constellix.com/rest/api/tcp/52906'
             }
         )
-        sonar_resp.headers = Mock()
-        provider._sonar._request = Mock(return_value=sonar_resp)
-
-        sonar_resp.json.side_effect = [
-            [
+        provider._sonar._request = Mock()
+        provider._sonar._request.side_effect = [
+            (
+                [
+                    {
+                        'id': 1,
+                        'name': 'USWAS01',
+                        'label': 'Site 1',
+                        'location': 'Washington, DC, U.S.A',
+                        'country': 'U.S.A',
+                        'region': 'ASIAPAC',
+                    },
+                    {
+                        'id': 23,
+                        'name': 'CATOR01',
+                        'label': 'Site 1',
+                        'location': 'Toronto,Canada',
+                        'country': 'Canada',
+                        'region': 'EUROPE',
+                    },
+                ],
+                {},
+            ),  # available agents
+            ([], {}),  # no checks
+            (
+                {},
                 {
-                    'id': 1,
-                    'name': 'USWAS01',
-                    'label': 'Site 1',
-                    'location': 'Washington, DC, U.S.A',
-                    'country': 'U.S.A',
-                    'region': 'ASIAPAC',
+                    'Location': 'http://api.sonar.constellix.com/rest/api/tcp/52906'
                 },
+            ),  # POST only returns 201 / created with new ID in header
+            ({'id': 52906, 'name': 'check1'}, {}),  # get new record
+            (
+                {},
                 {
-                    'id': 23,
-                    'name': 'CATOR01',
-                    'label': 'Site 1',
-                    'location': 'Toronto,Canada',
-                    'country': 'Canada',
-                    'region': 'EUROPE',
+                    'Location': 'http://api.sonar.constellix.com/rest/api/tcp/52907'
                 },
-            ],  # available agents
-            [],  # no checks
-            {'id': 52906, 'name': 'check1'},
-            {'id': 52907, 'name': 'check2'},
+            ),  # POST only returns 201 / created with new ID in header
+            ({'id': 52907, 'name': 'check2'}, {}),  # get new record
         ]
 
         plan = provider.plan(expected)
