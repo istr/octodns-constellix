@@ -10,7 +10,7 @@ from base64 import b64encode
 from collections import defaultdict
 
 from pycountry_convert import country_alpha2_to_continent_code
-from requests import Session
+from requests_cache import CachedSession
 
 from octodns import __VERSION__ as octodns_version
 from octodns.provider import ProviderException
@@ -47,7 +47,12 @@ class ConstellixAPI(object):
         self.api_key = api_key
         self.secret_key = secret_key
         self.ratelimit_delay = ratelimit_delay
-        self._sess = Session()
+        self._sess = CachedSession(
+            backend='memory',
+            allowable_methods=['GET', 'HEAD'],
+            allowable_codes=[200],
+            ignored_parameters=['x-cns-security-token', 'authorization'],
+        )
         self._sess.headers.update(
             {
                 'User-Agent': f'octodns/{octodns_version} octodns-constellix/{__VERSION__}'
