@@ -285,34 +285,42 @@ class TestConstellixProvider(TestCase):
 
         # Non-existent domain, create everything.
         resp_side_effect = [
-            [],  # no domains returned during populate
-            [{'id': 123123, 'name': 'unit.tests'}],  # domain created in apply
-            [
-                {
-                    'id': 1808516,
-                    'type': 'A',
-                    'name': 'www',
-                    'ttl': 300,
-                    'recordOption': 'roundRobin',
-                    'value': ['1.2.3.4', '2.2.3.4'],
-                }
-            ],  # global default entry created in apply
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
+            ([], {}, False),  # no domains returned during populate
+            (
+                [{'id': 123123, 'name': 'unit.tests'}],
+                {},
+                False,
+            ),  # domain created in apply
+            (
+                [
+                    {
+                        'id': 1808516,
+                        'type': 'A',
+                        'name': 'www',
+                        'ttl': 300,
+                        'recordOption': 'roundRobin',
+                        'value': ['1.2.3.4', '2.2.3.4'],
+                    }
+                ],
+                {},
+                False,
+            ),  # global default entry created in apply
+            ([], {}, False),
+            ([], {}, False),
+            ([], {}, False),
+            ([], {}, False),
+            ([], {}, False),
+            ([], {}, False),
+            ([], {}, False),
+            ([], {}, False),
+            ([], {}, False),
+            ([], {}, False),
+            ([], {}, False),
+            ([], {}, False),
+            ([], {}, False),
+            ([], {}, False),
+            ([], {}, False),
+            ([], {}, False),
         ]
         provider._client._request.side_effect = resp_side_effect
 
@@ -605,30 +613,32 @@ class TestConstellixProvider(TestCase):
 
         # Domain exists, we don't care about return
         resp_side_effect = [
-            [],  # delete A record ttl
-            [],  # delete pool www.dynamic:A:two
-            {
-                'id': 123123,
-                'name': 'unit.tests',
-                'hasGeoIP': False,
-            },  # domain listed for enabling geo
-            [
-                {'id': 1808521, 'name': 'unit.tests.:www.dynamic:A:one'}
-            ],  # pool re-created in apply
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
+            ([], {}, False),  # delete A record ttl
+            ([], {}, False),  # delete pool www.dynamic:A:two
+            (
+                {'id': 123123, 'name': 'unit.tests', 'hasGeoIP': False},
+                {},
+                False,
+            ),  # domain listed for enabling geo
+            (
+                [{'id': 1808521, 'name': 'unit.tests.:www.dynamic:A:one'}],
+                {},
+                False,
+            ),  # pool re-created in apply
+            ([], {}, False),
+            ([], {}, False),
+            ([], {}, False),
+            ([], {}, False),
+            ([], {}, False),
+            ([], {}, False),
+            ([], {}, False),
+            ([], {}, False),
+            ([], {}, False),
+            ([], {}, False),
+            ([], {}, False),
+            ([], {}, False),
+            ([], {}, False),
+            ([], {}, False),
         ]
         provider._client._request.side_effect = resp_side_effect
 
@@ -740,54 +750,76 @@ class TestConstellixProvider(TestCase):
 
         # non-existent domain, create everything
         resp_side_effect = [
-            [],  # no domains returned during populate
-            [{'id': 123123, 'name': 'unit.tests'}],  # domain created in apply
-            [],  # no pools returned during populate
-            [
-                {'id': 1808521, 'name': 'unit.tests.:www.dynamic:A:two'}
-            ],  # pool created in apply
-            [
-                {
-                    'id': 1,
-                    'name': 'World (Default)',
-                    'geoipContinents': ['default'],
-                }
-            ],  # geofilters returned
-            [
-                {
-                    'id': 3049,
-                    'name': 'unit.tests.:www.dynamic:A:two',
-                    'geoipContinents': ['default'],
-                }
-            ],  # geofilter created in apply
-            {
-                'id': 123123,
-                'name': 'unit.tests',
-                'hasGeoIP': False,
-            },  # domain listed for enabling geo
-            [],  # enabling geo
-            [
-                {
-                    'id': 1808516,
-                    'type': 'A',
-                    'name': 'www.dynamic',
-                    'ttl': 300,
-                    'recordOption': 'roundRobin',
-                    'value': ['7.7.7.7', '8.8.8.8'],
-                }
-            ],  # global default entry created in apply
-            [
-                {
-                    'id': 1808521,
-                    'type': 'A',
-                    'name': 'www.dynamic',
-                    'geolocation': {'geoipFilter': 1},
-                    'ttl': 300,
-                    'recordOption': 'pool',
-                    'value': [],
-                    'pools': ['1'],
-                }
-            ],  # pool with geo entry created in apply
+            ([], {}, False),  # no domains returned during populate
+            (
+                [{'id': 123123, 'name': 'unit.tests'}],
+                {},
+                False,
+            ),  # domain created in apply
+            ([], {}, False),  # no pools returned during populate
+            (
+                [{'id': 1808521, 'name': 'unit.tests.:www.dynamic:A:two'}],
+                {},
+                False,
+            ),  # pool created in apply
+            (
+                [
+                    {
+                        'id': 1,
+                        'name': 'World (Default)',
+                        'geoipContinents': ['default'],
+                    }
+                ],
+                {},
+                False,
+            ),  # geofilters returned
+            (
+                [
+                    {
+                        'id': 3049,
+                        'name': 'unit.tests.:www.dynamic:A:two',
+                        'geoipContinents': ['default'],
+                    }
+                ],
+                {},
+                False,
+            ),  # geofilter created in apply
+            (
+                {'id': 123123, 'name': 'unit.tests', 'hasGeoIP': False},
+                {},
+                False,
+            ),  # domain listed for enabling geo
+            ([], {}, False),  # enabling geo
+            (
+                [
+                    {
+                        'id': 1808516,
+                        'type': 'A',
+                        'name': 'www.dynamic',
+                        'ttl': 300,
+                        'recordOption': 'roundRobin',
+                        'value': ['7.7.7.7', '8.8.8.8'],
+                    }
+                ],
+                {},
+                False,
+            ),  # global default entry created in apply
+            (
+                [
+                    {
+                        'id': 1808521,
+                        'type': 'A',
+                        'name': 'www.dynamic',
+                        'geolocation': {'geoipFilter': 1},
+                        'ttl': 300,
+                        'recordOption': 'pool',
+                        'value': [],
+                        'pools': ['1'],
+                    }
+                ],
+                {},
+                False,
+            ),  # pool with geo entry created in apply
         ]
         provider._client._request.side_effect = resp_side_effect
 
@@ -1036,34 +1068,48 @@ class TestConstellixProvider(TestCase):
 
         # non-existent domain, create everything
         resp_side_effect = [
-            [],  # no domains returned during populate
-            [{'id': 123123, 'name': 'unit.tests'}],  # domain created in apply
-            [],  # No pools returned during populate
-            [
-                {'id': 1808521, 'name': 'unit.tests.:www.dynamic:A:two'}
-            ],  # pool created in apply
-            [
-                {
-                    'id': 1,
-                    'name': 'World (Default)',
-                    'geoipContinents': ['default'],
-                }
-            ],  # geofilters returned
-            [
-                {
-                    'id': 9049,
-                    'name': 'unit.tests.:www.dynamic:AAAA:two',
-                    'geoipContinents': ['default'],
-                }
-            ],  # geofilter created in apply
-            {
-                'id': 123123,
-                'name': 'unit.tests',
-                'hasGeoIP': False,
-            },  # domain listed for enabling geo
-            [],  # enabling geo
-            [],  # create global default AAAA record
-            [],  # create pooled AAAA record
+            ([], {}, False),  # no domains returned during populate
+            (
+                [{'id': 123123, 'name': 'unit.tests'}],
+                {},
+                False,
+            ),  # domain created in apply
+            ([], {}, False),  # No pools returned during populate
+            (
+                [{'id': 1808521, 'name': 'unit.tests.:www.dynamic:A:two'}],
+                {},
+                False,
+            ),  # pool created in apply
+            (
+                [
+                    {
+                        'id': 1,
+                        'name': 'World (Default)',
+                        'geoipContinents': ['default'],
+                    }
+                ],
+                {},
+                False,
+            ),  # geofilters returned
+            (
+                [
+                    {
+                        'id': 9049,
+                        'name': 'unit.tests.:www.dynamic:AAAA:two',
+                        'geoipContinents': ['default'],
+                    }
+                ],
+                {},
+                False,
+            ),  # geofilter created in apply
+            (
+                {'id': 123123, 'name': 'unit.tests', 'hasGeoIP': False},
+                {},
+                False,
+            ),  # domain listed for enabling geo
+            ([], {}, False),  # enabling geo
+            ([], {}, False),  # create global default AAAA record
+            ([], {}, False),  # create pooled AAAA record
         ]
         provider._client._request.side_effect = resp_side_effect
 
@@ -1244,55 +1290,75 @@ class TestConstellixProvider(TestCase):
 
         # non-existent domain, create everything
         resp_side_effect = [
-            [],  # no domains returned during populate
-            [{'id': 123123, 'name': 'unit.tests'}],  # domain created in apply
-            [],  # No pools returned during populate
-            [
-                {'id': 1808522, 'name': 'unit.tests.:www.dynamic:A:one'}
-            ],  # pool created in apply
-            [
-                {'id': 1808521, 'name': 'unit.tests.:www.dynamic:A:two'}
-            ],  # pool created in apply
-            [
-                {
-                    'id': 1,
-                    'name': 'World (Default)',
-                    'geoipContinents': ['default'],
-                }
-            ],  # geofilters returned in apply
-            [
-                {
-                    'id': 5303,
-                    'name': 'unit.tests.:www.dynamic:A:one',
-                    'filterRulesLimit': 100,
-                    'geoipContinents': ['AS', 'OC'],
-                    'geoipCountries': ['ES', 'SE', 'UA'],
-                    'regions': [
-                        {
-                            'continentCode': 'NA',
-                            'countryCode': 'CA',
-                            'regionCode': 'NL',
-                        }
-                    ],
-                }
-            ],  # geofilter created in apply
-            [
-                {
-                    'id': 9303,
-                    'name': 'unit.tests.:www.dynamic:A:two',
-                    'filterRulesLimit': 100,
-                    'geoipContinents': ['default'],
-                }
-            ],  # geofilter created in apply
-            {
-                'id': 123123,
-                'name': 'unit.tests',
-                'hasGeoIP': False,
-            },  # domain listed for enabling geo
-            [],  # enabling geo
-            [],
-            [],
-            [],
+            ([], {}, False),  # no domains returned during populate
+            (
+                [{'id': 123123, 'name': 'unit.tests'}],
+                {},
+                False,
+            ),  # domain created in apply
+            ([], {}, False),  # No pools returned during populate
+            (
+                [{'id': 1808522, 'name': 'unit.tests.:www.dynamic:A:one'}],
+                {},
+                False,
+            ),  # pool created in apply
+            (
+                [{'id': 1808521, 'name': 'unit.tests.:www.dynamic:A:two'}],
+                {},
+                False,
+            ),  # pool created in apply
+            (
+                [
+                    {
+                        'id': 1,
+                        'name': 'World (Default)',
+                        'geoipContinents': ['default'],
+                    }
+                ],
+                {},
+                False,
+            ),  # geofilters returned in apply
+            (
+                [
+                    {
+                        'id': 5303,
+                        'name': 'unit.tests.:www.dynamic:A:one',
+                        'filterRulesLimit': 100,
+                        'geoipContinents': ['AS', 'OC'],
+                        'geoipCountries': ['ES', 'SE', 'UA'],
+                        'regions': [
+                            {
+                                'continentCode': 'NA',
+                                'countryCode': 'CA',
+                                'regionCode': 'NL',
+                            }
+                        ],
+                    }
+                ],
+                {},
+                False,
+            ),  # geofilter created in apply
+            (
+                [
+                    {
+                        'id': 9303,
+                        'name': 'unit.tests.:www.dynamic:A:two',
+                        'filterRulesLimit': 100,
+                        'geoipContinents': ['default'],
+                    }
+                ],
+                {},
+                False,
+            ),  # geofilter created in apply
+            (
+                {'id': 123123, 'name': 'unit.tests', 'hasGeoIP': False},
+                {},
+                False,
+            ),  # domain listed for enabling geo
+            ([], {}, False),  # enabling geo
+            ([], {}, False),
+            ([], {}, False),
+            ([], {}, False),
         ]
         provider._client._request.side_effect = resp_side_effect
 
@@ -1508,48 +1574,60 @@ class TestConstellixProvider(TestCase):
 
         # Domain exists, we don't care about return
         resp_side_effect = [
-            [],  # get domain
-            [],  # delete A
-            [],  # delete geofilter
-            [],  # delete pool
-            [],  # delete A
-            [],  # delete geofilter
-            [],  # delete pool
-            [],  # delete A
-            {
-                'id': 1808522,
-                'name': 'unit.tests.:www.dynamic:A:one',
-                'type': 'A',
-                'values': [
-                    {'value': '1.2.3.6', 'weight': 5},
-                    {'value': '1.2.3.7', 'weight': 2},
-                ],
-            },  # update pool - no list
-            {
-                'id': 1808521,
-                'name': 'unit.tests.:www.dynamic:A:two',
-                'type': 'A',
-                'values': [{'value': '1.2.3.4', 'weight': 1}],
-            },  # update pool - no list
-            [
+            ([], {}, False),  # get domain
+            ([], {}, False),  # delete A
+            ([], {}, False),  # delete geofilter
+            ([], {}, False),  # delete pool
+            ([], {}, False),  # delete A
+            ([], {}, False),  # delete geofilter
+            ([], {}, False),  # delete pool
+            ([], {}, False),  # delete A
+            (
                 {
-                    'id': 1808523,
-                    'name': 'unit.tests.:www.dynamic:A:fallback',
+                    'id': 1808522,
+                    'name': 'unit.tests.:www.dynamic:A:one',
                     'type': 'A',
-                    'values': [{'value': '9.9.9.9', 'weight': 1}],
-                }
-            ],  # create pool - list
-            {},
-            {},
-            {
-                'id': 123123,
-                'name': 'unit.tests',
-                'hasGeoIP': True,
-            },  # domain listed for enabling geo
-            [],
-            [],
-            [],
-            [],
+                    'values': [
+                        {'value': '1.2.3.6', 'weight': 5},
+                        {'value': '1.2.3.7', 'weight': 2},
+                    ],
+                },
+                {},
+                False,
+            ),  # update pool - no list
+            (
+                {
+                    'id': 1808521,
+                    'name': 'unit.tests.:www.dynamic:A:two',
+                    'type': 'A',
+                    'values': [{'value': '1.2.3.4', 'weight': 1}],
+                },
+                {},
+                False,
+            ),  # update pool - no list
+            (
+                [
+                    {
+                        'id': 1808523,
+                        'name': 'unit.tests.:www.dynamic:A:fallback',
+                        'type': 'A',
+                        'values': [{'value': '9.9.9.9', 'weight': 1}],
+                    }
+                ],
+                {},
+                False,
+            ),  # create pool - list
+            ({}, {}, False),
+            ({}, {}, False),
+            (
+                {'id': 123123, 'name': 'unit.tests', 'hasGeoIP': True},
+                {},
+                False,
+            ),  # domain listed for enabling geo
+            ([], {}, False),
+            ([], {}, False),
+            ([], {}, False),
+            ([], {}, False),
         ]
         provider._client._request.side_effect = resp_side_effect
 
@@ -2169,14 +2247,18 @@ class TestConstellixProvider(TestCase):
         provider._client._request = Mock()
 
         resp_side_effect = [
-            [
-                {
-                    'id': 1,
-                    'name': 'World (Default)',
-                    'geoipContinents': ['default'],
-                }
-            ],  # geofilters returned
-            [],
+            (
+                [
+                    {
+                        'id': 1,
+                        'name': 'World (Default)',
+                        'geoipContinents': ['default'],
+                    }
+                ],
+                {},
+                False,
+            ),  # geofilters returned
+            ([], {}, False),
         ]
         provider._client._request.side_effect = resp_side_effect
 
@@ -2283,7 +2365,7 @@ class TestConstellixClient(TestCase):
         client = ConstellixClient(log, 'test', 'api', 'secret')
 
         client._request = Mock()
-        resp_side_effect = [[]]  # GET /geoFilters
+        resp_side_effect = [([], {}, False)]  # GET /geoFilters
         client._request.side_effect = resp_side_effect
 
         self.assertIsNone(client.geofilter_by_id(9999999))
