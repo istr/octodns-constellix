@@ -281,9 +281,7 @@ class TestConstellixProvider(TestCase):
             )
         )
 
-        resp = Mock()
-        resp.json = Mock()
-        provider._client._request = Mock(return_value=resp)
+        provider._client._request = Mock()
 
         # Non-existent domain, create everything.
         resp_side_effect = [
@@ -316,7 +314,7 @@ class TestConstellixProvider(TestCase):
             [],
             [],
         ]
-        resp.json.side_effect = resp_side_effect
+        provider._client._request.side_effect = resp_side_effect
 
         plan = provider.plan(expected)
 
@@ -632,7 +630,7 @@ class TestConstellixProvider(TestCase):
             [],
             [],
         ]
-        resp.json.side_effect = resp_side_effect
+        provider._client._request.side_effect = resp_side_effect
 
         wanted = Zone('unit.tests.', [])
         wanted.add_record(
@@ -738,9 +736,7 @@ class TestConstellixProvider(TestCase):
             )
         )
 
-        resp = Mock()
-        resp.json = Mock()
-        provider._client._request = Mock(return_value=resp)
+        provider._client._request = Mock()
 
         # non-existent domain, create everything
         resp_side_effect = [
@@ -793,7 +789,7 @@ class TestConstellixProvider(TestCase):
                 }
             ],  # pool with geo entry created in apply
         ]
-        resp.json.side_effect = resp_side_effect
+        provider._client._request.side_effect = resp_side_effect
 
         sonar_resp = Mock()
         sonar_resp.json = Mock()
@@ -1043,9 +1039,7 @@ class TestConstellixProvider(TestCase):
             )
         )
 
-        resp = Mock()
-        resp.json = Mock()
-        provider._client._request = Mock(return_value=resp)
+        provider._client._request = Mock()
 
         # non-existent domain, create everything
         resp_side_effect = [
@@ -1078,7 +1072,7 @@ class TestConstellixProvider(TestCase):
             [],  # create global default AAAA record
             [],  # create pooled AAAA record
         ]
-        resp.json.side_effect = resp_side_effect
+        provider._client._request.side_effect = resp_side_effect
 
         sonar_resp = Mock()
         sonar_resp.json = Mock()
@@ -1237,9 +1231,7 @@ class TestConstellixProvider(TestCase):
             )
         )
 
-        resp = Mock()
-        resp.json = Mock()
-        provider._client._request = Mock(return_value=resp)
+        provider._client._request = Mock()
 
         # non-existent domain, create everything
         resp_side_effect = [
@@ -1293,7 +1285,7 @@ class TestConstellixProvider(TestCase):
             [],
             [],
         ]
-        resp.json.side_effect = resp_side_effect
+        provider._client._request.side_effect = resp_side_effect
 
         plan = provider.plan(expected)
 
@@ -1413,7 +1405,6 @@ class TestConstellixProvider(TestCase):
         )
 
         provider._client._request.reset_mock()
-        resp.json.reset_mock()
 
         provider._client.records = Mock(
             return_value=[
@@ -1551,7 +1542,7 @@ class TestConstellixProvider(TestCase):
             [],
             [],
         ]
-        resp.json.side_effect = resp_side_effect
+        provider._client._request.side_effect = resp_side_effect
 
         wanted = Zone('unit.tests.', [])
         wanted.add_record(
@@ -1720,9 +1711,7 @@ class TestConstellixProvider(TestCase):
     def test_dynamic_record_failures(self):
         provider = ConstellixProvider('test', 'api', 'secret')
 
-        resp = Mock()
-        resp.json = Mock()
-        provider._client._request = Mock(return_value=resp)
+        provider._client._request = Mock()
 
         # Let's handle some failures for pools - first if it's not a simple
         # weighted pool - we'll be OK as we assume a weight of 1 for all
@@ -1768,7 +1757,7 @@ class TestConstellixProvider(TestCase):
 
         wanted = Zone('unit.tests.', [])
 
-        resp.json.side_effect = [['{}'], ['{}']]
+        provider._client._request.side_effect = [['{}'], ['{}']]
         wanted.add_record(
             Record.new(
                 wanted,
@@ -2168,9 +2157,7 @@ class TestConstellixProvider(TestCase):
             'geoipContinents': ['default'],
         }
 
-        resp = Mock()
-        resp.json = Mock()
-        provider._client._request = Mock(return_value=resp)
+        provider._client._request = Mock()
 
         resp_side_effect = [
             [
@@ -2182,7 +2169,7 @@ class TestConstellixProvider(TestCase):
             ],  # geofilters returned
             [],
         ]
-        resp.json.side_effect = resp_side_effect
+        provider._client._request.side_effect = resp_side_effect
 
         result = provider._create_update_geofilter(
             'World (Default)', ['EU'], [], [{'continentCode': 'EU'}]
@@ -2286,10 +2273,8 @@ class TestConstellixClient(TestCase):
         log = logging.getLogger('client')
         client = ConstellixClient(log, 'test', 'api', 'secret')
 
-        resp = Mock()
-        resp.json = Mock()
-        client._request = Mock(return_value=resp)
+        client._request = Mock()
         resp_side_effect = [[]]  # GET /geoFilters
-        resp.json.side_effect = resp_side_effect
+        client._request.side_effect = resp_side_effect
 
         self.assertIsNone(client.geofilter_by_id(9999999))

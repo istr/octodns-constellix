@@ -135,15 +135,15 @@ class ConstellixClient(ConstellixAPI):
         response, data, headers, cached = super()._request(
             method, path, params, data
         )
-        return response
+        return data
 
     @property
     def domains(self):
         if self._domains is None:
             zones = []
 
-            resp = self._request('GET', '/domains').json()
-            zones += resp
+            data = self._request('GET', '/domains')
+            zones += data
 
             self._domains = {f'{z["name"]}.': z['id'] for z in zones}
 
@@ -154,13 +154,13 @@ class ConstellixClient(ConstellixAPI):
         if not zone_id:
             raise ConstellixAPINotFound()
         path = f'/domains/{zone_id}'
-        return self._request('GET', path).json()
+        return self._request('GET', path)
 
     def domain_create(self, name):
-        resp = self._request('POST', '/domains', data={'names': [name]}).json()
+        data = self._request('POST', '/domains', data={'names': [name]})
         # Add newly created zone to domain cache
-        self._domains[f'{name}.'] = resp[0]['id']
-        return resp
+        self._domains[f'{name}.'] = data[0]['id']
+        return data
 
     def domain_enable_geoip(self, domain_name):
         domain = self.domain(domain_name)
@@ -168,7 +168,7 @@ class ConstellixClient(ConstellixAPI):
             domain_id = self.domains[domain_name]
             return self._request(
                 'PUT', f'/domains/{domain_id}', data={'hasGeoIP': True}
-            ).json()
+            )
 
     def _absolutize_value(self, value, zone_name):
         if value == '':
@@ -184,8 +184,8 @@ class ConstellixClient(ConstellixAPI):
             raise ConstellixAPINotFound()
         path = f'/domains/{zone_id}/records'
 
-        resp = self._request('GET', path).json()
-        for record in resp:
+        data = self._request('GET', path)
+        for record in data:
             # change ANAME records to ALIAS
             if record['type'] == 'ANAME':
                 record['type'] = 'ALIAS'
@@ -201,7 +201,7 @@ class ConstellixClient(ConstellixAPI):
                             v['value'], zone_name
                         )
 
-        return resp
+        return data
 
     def record_create(self, zone_name, record_type, params):
         # change ALIAS records to ANAME
@@ -211,7 +211,7 @@ class ConstellixClient(ConstellixAPI):
         zone_id = self.domains.get(zone_name, False)
         path = f'/domains/{zone_id}/records/{record_type}'
 
-        return self._request('POST', path, data=params).json()
+        return self._request('POST', path, data=params)
 
     def record_delete(self, zone_name, record_type, record_id):
         # change ALIAS records to ANAME
@@ -220,14 +220,14 @@ class ConstellixClient(ConstellixAPI):
 
         zone_id = self.domains.get(zone_name, False)
         path = f'/domains/{zone_id}/records/{record_type}/{record_id}'
-        return self._request('DELETE', path).json()
+        return self._request('DELETE', path)
 
     def pools(self, pool_type):
         if self._pools[pool_type] is None:
             self._pools[pool_type] = {}
             path = f'/pools/{pool_type}'
-            response = self._request('GET', path).json()
-            for pool in response:
+            data = self._request('GET', path)
+            for pool in data:
                 self._pools[pool_type][pool['id']] = pool
         return self._pools[pool_type].values()
 
@@ -245,19 +245,19 @@ class ConstellixClient(ConstellixAPI):
                 return pool
         return None
 
-    def pool_create(self, data):
-        path = f'/pools/{data.get("type")}'
+    def pool_create(self, pool_data):
+        path = f'/pools/{pool_data.get("type")}'
         # This returns a list of items, we want the first one
-        response = self._request('POST', path, data=data).json()
+        data = self._request('POST', path, data=pool_data)
 
         # Update our cache
-        self._pools[data.get('type')][response[0]['id']] = response[0]
-        return response[0]
+        self._pools[pool_data.get('type')][data[0]['id']] = data[0]
+        return data[0]
 
     def pool_update(self, pool_id, data):
         path = f'/pools/{data.get("type")}/{pool_id}'
         try:
-            data = self._request('PUT', path, data=data).json()
+            data = self._request('PUT', path, data=data)
 
         except ConstellixAPIBadRequest as e:
             message = str(e)
@@ -270,19 +270,19 @@ class ConstellixClient(ConstellixAPI):
 
     def pool_delete(self, pool_type, pool_id):
         path = f'/pools/{pool_type}/{pool_id}'
-        resp = self._request('DELETE', path).json()
+        data = self._request('DELETE', path)
 
         # Update our cache
         if self._pools[pool_type] is not None:
             self._pools[pool_type].pop(pool_id, None)
-        return resp
+        return data
 
     def geofilters(self):
         if self._geofilters is None:
             self._geofilters = {}
             path = '/geoFilters'
-            response = self._request('GET', path).json()
-            for geofilter in response:
+            data = self._request('GET', path)
+            for geofilter in data:
                 self._geofilters[geofilter['id']] = geofilter
         return self._geofilters.values()
 
@@ -300,18 +300,18 @@ class ConstellixClient(ConstellixAPI):
                 return geofilter
         return None
 
-    def geofilter_create(self, data):
+    def geofilter_create(self, geofilter_data):
         path = '/geoFilters'
-        response = self._request('POST', path, data=data).json()
+        data = self._request('POST', path, data=geofilter_data)
 
         # Update our cache
-        self._geofilters[response[0]['id']] = response[0]
-        return response[0]
+        self._geofilters[data[0]['id']] = data[0]
+        return data[0]
 
     def geofilter_update(self, geofilter_id, data):
         path = f'/geoFilters/{geofilter_id}'
         try:
-            data = self._request('PUT', path, data=data).json()
+            data = self._request('PUT', path, data=data)
 
         except ConstellixAPIBadRequest as e:
             message = str(e)
@@ -324,12 +324,12 @@ class ConstellixClient(ConstellixAPI):
 
     def geofilter_delete(self, geofilter_id):
         path = f'/geoFilters/{geofilter_id}'
-        resp = self._request('DELETE', path).json()
+        data = self._request('DELETE', path)
 
         # Update our cache
         if self._geofilters is not None:
             self._geofilters.pop(geofilter_id, None)
-        return resp
+        return data
 
 
 class SonarClient(ConstellixAPI):
