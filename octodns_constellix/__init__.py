@@ -98,6 +98,7 @@ class ConstellixAPI(object):
 
         status_code = resp.status_code
         headers = resp.headers
+        from_cache = resp.from_cache
 
         if status_code == 400:
             raise ConstellixAPIBadRequest(self._get_json(resp))
@@ -113,7 +114,7 @@ class ConstellixAPI(object):
             self.log.debug('Waiting for Constellix Rate Limit Delay')
         time.sleep(self.ratelimit_delay)
 
-        return resp, self._get_json(resp), headers
+        return resp, self._get_json(resp), headers, from_cache
 
 
 class ConstellixClient(ConstellixAPI):
@@ -131,7 +132,9 @@ class ConstellixClient(ConstellixAPI):
         self._geofilters = None
 
     def _request(self, method, path, params=None, data=None):
-        response, data, headers = super()._request(method, path, params, data)
+        response, data, headers, cached = super()._request(
+            method, path, params, data
+        )
         return response
 
     @property
@@ -342,7 +345,9 @@ class SonarClient(ConstellixAPI):
         self._checks = {'tcp': None, 'http': None}
 
     def _request(self, method, path, params=None, data=None):
-        resp, data, headers = super()._request(method, path, params, data)
+        resp, data, headers, cached = super()._request(
+            method, path, params, data
+        )
 
         return resp
 
