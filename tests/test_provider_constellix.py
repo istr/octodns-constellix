@@ -822,31 +822,41 @@ class TestConstellixProvider(TestCase):
                     },
                 ],
                 {},
+                False,
             ),  # available agents
             (
                 [{'id': 52, 'name': 'unit.tests.:www.dynamic:A:two-1.2.3.4'}],
                 {},
+                False,
             ),  # initial checks
-            ({}, {}),  # call('DELETE', '/tcp/52'),  # recreate, same name
+            (
+                {},
+                {},
+                False,
+            ),  # call('DELETE', '/tcp/52'),  # recreate, same name
             (
                 {},
                 {
                     'Location': 'http://api.sonar.constellix.com/rest/api/tcp/52906'
                 },
+                False,
             ),  # call('POST', '/tcp', ...
             (
                 {'id': 52906, 'name': 'unit.tests.:www.dynamic:A:two-1.2.3.4'},
                 {},
+                False,
             ),  # check_create GET data
             (
                 {},
                 {
                     'Location': 'http://api.sonar.constellix.com/rest/api/tcp/52907'
                 },
+                False,
             ),  # call('POST', '/tcp', ...
             (
                 {'id': 52907, 'name': 'unit.tests.:www.dynamic:A:two-1.2.3.5'},
                 {},
+                False,
             ),  # check_create GET data
         ]
         provider._sonar._request.side_effect = sonar_resp_side_effect
@@ -1086,22 +1096,25 @@ class TestConstellixProvider(TestCase):
                     },
                 ],
                 {},
+                False,
             ),  # available agents
-            ([], {}),  # no checks
+            ([], {}, False),  # no checks
             (
                 {},
                 {
                     'Location': 'http://api.sonar.constellix.com/rest/api/tcp/52906'
                 },
+                False,
             ),  # POST only returns 201 / created with new ID in header
-            ({'id': 52906, 'name': 'check1'}, {}),  # get new record
+            ({'id': 52906, 'name': 'check1'}, {}, False),  # get new record
             (
                 {},
                 {
                     'Location': 'http://api.sonar.constellix.com/rest/api/tcp/52907'
                 },
+                False,
             ),  # POST only returns 201 / created with new ID in header
-            ({'id': 52907, 'name': 'check2'}, {}),  # get new record
+            ({'id': 52907, 'name': 'check2'}, {}, False),  # get new record
         ]
 
         plan = provider.plan(expected)
