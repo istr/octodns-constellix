@@ -49,7 +49,9 @@ providers:
 
 #### Records
 
-ConstellixProvider supports A, AAAA, ALIAS (ANAME), CAA, CNAME, MX, NS, PTR, SPF, SRV, and TXT. There are some restrictions on CAA tags support.
+ConstellixProvider supports A, AAAA, ALIAS (ANAME), CAA, CNAME, MX, NS, PTR, SPF, SRV, and TXT.
+There are some restrictions on CAA tags support.
+The ANAME feature resolves upstream A records, but not AAAA records.
 
 #### Dynamic
 
